@@ -350,6 +350,14 @@ class ClientTab(QWidget):
             "átmásolja minden lekérdezési sorra."
         )
         apply_btn.clicked.connect(self._apply_manual_decode_to_all_rows)
+        self._auto_start_poll_check = QCheckBox("Auto-indul csatlakozáskor")
+        self._auto_start_poll_check.setChecked(True)
+        self._auto_start_poll_check.setToolTip(
+            "Ha be van pipálva, a polling automatikusan elindul minden "
+            "sikeres csatlakozás után — feltéve, hogy legalább egy aktív "
+            "sor van a táblázatban. Szétkapcsoláskor a polling leáll."
+        )
+
         self._poll_start_btn = QPushButton("Polling indítása")
         self._poll_start_btn.setCheckable(True)
         self._poll_start_btn.toggled.connect(self._toggle_polling)
@@ -359,6 +367,7 @@ class ClientTab(QWidget):
         toolbar.addWidget(remove_btn)
         toolbar.addWidget(apply_btn)
         toolbar.addStretch(1)
+        toolbar.addWidget(self._auto_start_poll_check)
         toolbar.addWidget(self._poll_start_btn)
 
         box = QGroupBox("Polling")
@@ -477,6 +486,14 @@ class ClientTab(QWidget):
             f"unit={self._unit_spin.value()}"
         )
         self.status_changed.emit(True, description)
+
+        # Auto-start polling if the user enabled it and there are rows to poll.
+        if (
+            self._auto_start_poll_check.isChecked()
+            and self._poll_table.rowCount() > 0
+            and not self._poll_start_btn.isChecked()
+        ):
+            self._poll_start_btn.setChecked(True)
 
     async def _disconnect_task(self) -> None:
         # Stop polling first so in-flight requests don't race with disconnect.
