@@ -23,7 +23,10 @@ Remove-Item -Recurse -Force "$repoRoot\dist\ModbusSimulator" -ErrorAction Silent
 Remove-Item -Force "$repoRoot\dist\ModbusSimulator.exe" -ErrorAction SilentlyContinue
 
 Write-Host "[build_exe] syncing dependencies (incl. dev for PyInstaller)..." -ForegroundColor Cyan
-uv sync --extra dev
+# --group dev because PEP-735 dependency groups (not PEP-621 optional-deps);
+# default uv sync also includes dev but be explicit so future uv changes don't
+# silently drop PyInstaller.
+uv sync --group dev
 if ($LASTEXITCODE -ne 0) { throw "uv sync failed" }
 
 Write-Host "[build_exe] running PyInstaller..." -ForegroundColor Cyan
