@@ -1,0 +1,130 @@
+[project]
+name = "modbus-simulator"
+version = "0.1.0"
+description = "Modbus TCP simulator with GUI for macOS — server, client, value simulation, fault injection, traffic log, trend chart."
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [{ name = "Kremzer Peter" }]
+keywords = ["modbus", "modbus-tcp", "simulator", "industrial", "plc", "scada"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: MacOS X",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS :: MacOS X",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Communications",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: System :: Networking",
+]
+dependencies = [
+    "PyQt6>=6.7",
+    "qasync>=0.27",
+    "pymodbus>=3.7",
+    "pyqtgraph>=0.13",
+    "pydantic>=2.7",
+    "platformdirs>=4.2",
+]
+
+[project.scripts]
+modbus-simulator = "modbus_simulator.__main__:main"
+
+[build-system]
+requires = ["setuptools>=70", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+modbus_simulator = ["i18n/*.json"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.2",
+    "pytest-asyncio>=0.23",
+    "pytest-qt>=4.4",
+    "pytest-cov>=5.0",
+    "ruff>=0.6",
+    "mypy>=1.11",
+    "py2app>=0.28 ; sys_platform == 'darwin'",
+    "pyinstaller>=6.10 ; sys_platform == 'win32'",
+]
+
+# ---------------------------------------------------------------------------
+# Ruff
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "F", "W",   # pycodestyle + pyflakes
+    "I",             # isort
+    "B",             # bugbear
+    "UP",            # pyupgrade
+    "N",             # pep8-naming
+    "S",             # bandit
+    "C4",            # comprehensions
+    "SIM",           # simplify
+    "RUF",           # ruff-specific
+    "ASYNC",         # async lints
+]
+ignore = [
+    "S101",          # allow assert in tests
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["S", "N802"]
+"src/modbus_simulator/core/script_sandbox.py" = ["S307"]  # we implement our own sandbox
+"src/modbus_simulator/gui/**/*.py" = [
+    "B008",    # Qt API forces factory objects as default args (QModelIndex(), QColor())
+    "RUF006",  # asyncio.create_task refs — fire-and-forget is intentional for UI handlers
+    "N802",    # Qt override names use camelCase
+]
+
+# ---------------------------------------------------------------------------
+# Mypy
+# ---------------------------------------------------------------------------
+[tool.mypy]
+strict = true
+python_version = "3.12"
+mypy_path = "src"
+packages = ["modbus_simulator"]
+warn_unused_ignores = true
+warn_redundant_casts = true
+disallow_untyped_decorators = true
+
+[[tool.mypy.overrides]]
+module = ["pymodbus.*", "qasync.*", "pyqtgraph.*"]
+ignore_missing_imports = true
+
+# ---------------------------------------------------------------------------
+# Pytest
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+addopts = "-ra --strict-markers --strict-config -m 'not realhw'"
+markers = [
+    "integration: tests that use real TCP loopback sockets",
+    "slow: long-running tests (load, stress)",
+    "realhw: tests that talk to a physical Modbus device (skipped by default)",
+]
+
+# ---------------------------------------------------------------------------
+# Coverage
+# ---------------------------------------------------------------------------
+[tool.coverage.run]
+source = ["src/modbus_simulator/core"]
+branch = true
+
+[tool.coverage.report]
+exclude_also = [
+    "raise NotImplementedError",
+    "if TYPE_CHECKING:",
+    "@overload",
+]

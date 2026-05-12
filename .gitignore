@@ -1,0 +1,53 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+*.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+# keep uv.lock in git
+.uv-cache/
+
+# Build artifacts
+build/
+dist/
+*.dmg
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# IDEs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# App runtime data (created at user runtime, not in repo)
+!/src/**/*.json
+*.log
+
+# Local session state (never commit user's session dumps)
+last_session.json
+*.session.json
+
+# Local Claude / IDE state — machine-specific
+.claude/settings.local.json
