@@ -7,7 +7,9 @@ Run via ``scripts\\build_exe.ps1`` which invokes
 
 from pathlib import Path
 
-ROOT = Path(__file__).resolve().parent.parent
+# PyInstaller runs this file via exec(); it injects SPECPATH (the directory
+# containing the .spec) into the namespace. __file__ is NOT available.
+ROOT = Path(SPECPATH).parent.resolve()  # noqa: F821 — SPECPATH is a PyInstaller global
 ICON = ROOT / "resources" / "icons" / "AppIcon.ico"
 
 block_cipher = None
